@@ -1,13 +1,12 @@
 import { bookmarkUrl } from '../../../integrations/poe-trade/navigation'
 import { setPendingBookmarkTrade } from '../../../lib/results/pageCapture'
 import { BookmarkLiveAction } from '../../liveSearch/BookmarkLiveAction'
-import { DragHandle, SortableItem, SortableList } from '../../../components/Sortable'
+import { DragHandle, SortableItem, SortableGroup } from '../../../components/Sortable'
 import { Icon } from '../../../components/Icon'
 import { type Trade } from '../../../lib/bookmarks/storage'
 
 export function TradeList({
     trades,
-    onMove,
     onComplete,
     onEdit,
     onCopy,
@@ -16,7 +15,6 @@ export function TradeList({
     onDelete,
 }: {
     trades: Trade[]
-    onMove: (from: number, to: number) => void
     onComplete: (trade: Trade) => void
     onEdit: (trade: Trade) => void
     onCopy: (trade: Trade) => void
@@ -25,7 +23,7 @@ export function TradeList({
     onDelete: (trade: Trade) => void
 }) {
     return (
-        <SortableList ids={trades.map((trade) => trade.id)} onMove={onMove}>
+        <SortableGroup ids={trades.map((trade) => trade.id)}>
             {trades.map((trade) => (
                 <SortableItem key={trade.id} id={trade.id} className="bt-trade-row">
                     <a
@@ -87,11 +85,11 @@ export function TradeList({
                             <button onClick={() => onDelete(trade)}>Delete trade</button>
                         </div>
                     </details>
-                    <DragHandle label={'Drag ' + trade.title + ' to reorder'}>
+                    <DragHandle label={'Drag ' + trade.title + ' to move'}>
                         <Icon name="sort" />
                     </DragHandle>
                 </SortableItem>
             ))}
-        </SortableList>
+        </SortableGroup>
     )
 }

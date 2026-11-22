@@ -8,7 +8,6 @@ import { currentLocation } from '../../../integrations/poe-trade/location'
 import { getFirstListingPrice } from '../../../lib/results/pageCapture'
 import { type Folder, type Trade } from '../../../lib/bookmarks/storage'
 import { recommendTitle } from '../../../integrations/poe-trade/searchPanel'
-import { reordered } from '../bookmarkUtils'
 import { useFolderTrades } from '../hooks/useFolderTrades'
 import { FolderHeader } from './FolderHeader'
 import { TradeEditorDialog } from './TradeEditorDialog'
@@ -17,19 +16,28 @@ import { TradeList } from './TradeList'
 type Props = {
     folder: Folder
     expanded: boolean
+    isDropTarget?: boolean
     onToggle: () => void
     onEdit: () => void
     onArchive: () => void
     onRemove: () => Promise<void>
 }
 
-export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRemove }: Props) {
+export function FolderView({
+    folder,
+    expanded,
+    isDropTarget = false,
+    onToggle,
+    onEdit,
+    onArchive,
+    onRemove,
+}: Props) {
     const [deleteFolder, setDeleteFolder] = useState(false)
     const [draft, setDraft] = useState<Trade | null>(null)
     const [deleting, setDeleting] = useState<Trade | null>(null)
     const [exported, setExported] = useState<string | null>(null)
     const [error, setError] = useState('')
-    const { client, queryKey, trades, mutation, reorderMutation } = useFolderTrades(folder.id)
+    const { trades, mutation } = useFolderTrades(folder.id)
     const items = trades.data ?? []
     const save = (next: Trade[], onSuccess?: () => void) => mutation.mutate(next, { onSuccess })
     const update = (trade: Trade, change: Partial<Trade>) =>
@@ -59,7 +67,7 @@ export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRe
         })
     }
     return (
-        <div className="bt-folder">
+        <div className={isDropTarget ? 'bt-folder is-drop-target' : 'bt-folder'}>
             <FolderHeader
                 folder={folder}
                 expanded={expanded}
@@ -75,11 +83,6 @@ export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRe
                 <div className="bt-folder-body">
                     <TradeList
                         trades={items}
-                        onMove={(from, to) => {
-                            const next = reordered(items, from, to)
-                            client.setQueryData(queryKey, next)
-                            reorderMutation.mutate(next)
-                        }}
                         onComplete={(trade) =>
                             update(trade, {
                                 completedAt: trade.completedAt ? null : new Date().toISOString(),

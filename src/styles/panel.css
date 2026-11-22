@@ -748,6 +748,11 @@
 .bt-folder-wrapper.is-dragging > .bt-folder {
     background: #0f304d;
 }
+.bt-folder.is-drop-target {
+    outline: 2px solid #5aa9ff;
+    outline-offset: -2px;
+    background: #143a63;
+}
 .bt-trade-row.is-dragging {
     background: #4c4c7d;
 }

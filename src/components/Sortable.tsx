@@ -6,6 +6,11 @@ import {
     PointerSensor,
     useSensor,
     useSensors,
+    type CollisionDetection,
+    type DragEndEvent,
+    type DragOverEvent,
+    type DragStartEvent,
+    type Modifier,
 } from '@dnd-kit/core'
 import {
     SortableContext,
@@ -15,15 +20,29 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+// Lock dragging to the vertical axis so an item can't be dragged sideways and
+// overflow the panel (both folders and trades are single-column lists).
+const restrictToVerticalAxis: Modifier = ({ transform }) => ({
+    ...transform,
+    x: 0,
+})
+
 const Handle = createContext<ReturnType<typeof useSortable> | null>(null)
-export function SortableList({
-    ids,
+// The single shared drag-and-drop context for the bookmarks panel. It owns the
+// sensors and collision detection; the parent supplies onDragEnd so it can route
+// folder reorders and (cross-folder) trade moves through one handler.
+export function DndProvider({
+    onDragEnd,
+    onDragStart,
+    onDragOver,
+    collisionDetection = closestCenter,
     children,
-    onMove,
 }: {
-    ids: string[]
+    onDragEnd: (event: DragEndEvent) => void
+    onDragStart?: (event: DragStartEvent) => void
+    onDragOver?: (event: DragOverEvent) => void
+    collisionDetection?: CollisionDetection
     children: ReactNode
-    onMove: (from: number, to: number) => void
 }) {
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -34,18 +53,22 @@ export function SortableList({
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={({ active, over }) => {
-                if (over && active.id !== over.id) {
-                    const from = ids.indexOf(String(active.id))
-                    const to = ids.indexOf(String(over.id))
-                    if (from >= 0 && to >= 0) onMove(from, to)
-                }
-            }}>
-            <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                {children}
-            </SortableContext>
+            collisionDetection={collisionDetection}
+            modifiers={[restrictToVerticalAxis]}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDragEnd={onDragEnd}>
+            {children}
         </DndContext>
+    )
+}
+// A group of sortable items inside the shared context. Folders form one flat
+// group; each folder's trades form a nested group so items can move between them.
+export function SortableGroup({ ids, children }: { ids: string[]; children: ReactNode }) {
+    return (
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+            {children}
+        </SortableContext>
     )
 }
 export function SortableItem({
