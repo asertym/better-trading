@@ -1,4 +1,5 @@
 import { bookmarkUrl } from '../../../integrations/poe-trade/navigation'
+import { setPendingBookmarkTrade } from '../../../lib/results/pageCapture'
 import { BookmarkLiveAction } from '../../liveSearch/BookmarkLiveAction'
 import { DragHandle, SortableItem, SortableList } from '../../../components/Sortable'
 import { Icon } from '../../../components/Icon'
@@ -31,7 +32,8 @@ export function TradeList({
                         className="flex-1 underline flex justify-between gap-4"
                         href={bookmarkUrl(trade)}
                         aria-disabled={!bookmarkUrl(trade)}
-                        onClick={() => sessionStorage.setItem('bt-bookmark-trade', trade.id)}>
+                        onClick={() =>
+                            bookmarkUrl(trade) && setPendingBookmarkTrade(trade.id)}>
                         {trade.completedAt && (
                             <span className="bt-completed" aria-label="Completed">
                                 ✓{' '}

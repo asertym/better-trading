@@ -5,6 +5,7 @@ import { Collapsible } from '../../../components/Collapsible'
 import { Dialog } from '../../../components/Dialog'
 import { serialize } from '../../../lib/bookmarks/export'
 import { currentLocation } from '../../../integrations/poe-trade/location'
+import { getFirstListingPrice } from '../../../lib/results/pageCapture'
 import { type Folder, type Trade } from '../../../lib/bookmarks/storage'
 import { recommendTitle } from '../../../integrations/poe-trade/searchPanel'
 import { reordered } from '../bookmarkUtils'
@@ -48,7 +49,14 @@ export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRe
     const register = () => {
         const { league: _, ...location } = currentLocation()
         if (!location.slug) return setError('Run a trade search before registering it.')
-        setDraft({ id: crypto.randomUUID(), title: recommendTitle(), location, completedAt: null })
+        const price = getFirstListingPrice()
+        setDraft({
+            id: crypto.randomUUID(),
+            title: recommendTitle(),
+            location,
+            completedAt: null,
+            ...(price ? { lastObservedPrice: price } : {}),
+        })
     }
     return (
         <div className="bt-folder">

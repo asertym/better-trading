@@ -3,7 +3,11 @@ vi.mock('wxt/browser', () => ({
     browser: { storage: { local: { get: vi.fn(), set: vi.fn(), remove: vi.fn() } } },
 }))
 import { browser } from 'wxt/browser'
-import { getTrades, removeFolder } from '../../../src/lib/bookmarks/storage'
+import {
+    getTrades,
+    recordTradePrice,
+    removeFolder,
+} from '../../../src/lib/bookmarks/storage'
 const stored: Record<string, unknown> = {}
 beforeEach(() => {
     vi.resetAllMocks()
@@ -14,7 +18,9 @@ beforeEach(() => {
         ],
         expiresAt: null,
     }
-    stored['bookmark-trades--one'] = { value: [{ id: 'trade' }] }
+    stored['bookmark-trades--one'] = {
+        value: [{ id: 'trade', location: { type: 'search', slug: 'abc' } }],
+    }
     vi.mocked(browser.storage.local.get).mockImplementation((async (key: string) => ({
         [key]: stored[key],
     })) as typeof browser.storage.local.get)
@@ -43,6 +49,19 @@ it('removes the folder and its contents on success', async () => {
     expect(stored['bookmark-trades--one']).toBeUndefined()
 })
 
+it('records the price on the trade in whichever folder holds it, overwriting the old value', async () => {
+    expect(await recordTradePrice('trade', { amount: 12.5, currency: 'chaos-orb' })).toBe('one')
+    expect(stored['bookmark-trades--one']).toMatchObject({
+        value: [{ id: 'trade', lastObservedPrice: { amount: 12.5, currency: 'chaos-orb' } }],
+    })
+    expect(
+        await recordTradePrice('trade', { amount: 1, currency: 'divine-orb', icon: 'x.png' })
+    ).toBe('one')
+    expect(stored['bookmark-trades--one']).toMatchObject({
+        value: [{ lastObservedPrice: { amount: 1, currency: 'divine-orb', icon: 'x.png' } }],
+    })
+    expect(await recordTradePrice('missing', { amount: 1, currency: 'chaos-orb' })).toBeNull()
+})
 it('does not replace unreadable or malformed trades with an empty collection', async () => {
     vi.mocked(browser.storage.local.get).mockRejectedValueOnce(new Error('Read failed'))
     await expect(getTrades('one')).rejects.toThrow('Read failed')
