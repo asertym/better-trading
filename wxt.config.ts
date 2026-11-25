@@ -40,6 +40,9 @@ export default {
         browser_specific_settings: {
             gecko: {
                 id: process.env.FIREFOX_EXTENSION_ID || 'better-trading@example.com',
+                data_collection_permissions: {
+                    required: ['none'],
+                },
             },
         },
     },
