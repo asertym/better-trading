@@ -3,10 +3,12 @@ import { Dialog } from '../../components/Dialog'
 import { ReleaseNotes } from '../../components/ReleaseNotes'
 import { searchShortcutsMarkdown } from '../../lib/searchShortcutDefinitions'
 import { Icon } from '../../components/Icon'
-import { ReleaseHistory } from '../Changelog'
+import { BackupControls } from '../bookmarks/BackupControls'
+import { ChangelogDialog } from '../Changelog'
 import { currentRelease } from '../../lib/releases'
-import { enhancerIds, useSettingsStore } from '../../stores/settings'
+import { enhancerIds, hideBookmarkPricesId, useSettingsStore } from '../../stores/settings'
 import { searchEnhancementIds } from '../../stores/settings'
+import { usePanelStore } from '../../stores/panel'
 
 const enhancerLabels = {
     'equivalent-pricings': 'Equivalent pricings (powered by poe.ninja)',
@@ -31,13 +33,19 @@ const searchEnhancementLabels = {
 
 export function AboutPanel() {
     const [showShortcuts, setShowShortcuts] = useState(false)
+    const [showChangelog, setShowChangelog] = useState(false)
     const { disabled, toggle } = useSettingsStore()
+    const { side, setSide } = usePanelStore()
     return (
         <section className="bt-about">
-            <ReleaseHistory />
-            <InfoBox title="Better Trading">
-                <p>A better trading experience for Path of Exile and Path of Exile 2.</p>
+            <InfoBox title={`What's new — v${currentRelease.version}`}>
+                <button className="px-4" onClick={() => setShowChangelog(true)}>
+                    View changelog
+                </button>
             </InfoBox>
+
+            {showChangelog && <ChangelogDialog close={() => setShowChangelog(false)} />}
+
             <InfoBox title="Settings">
                 {enhancerIds.map((id) => (
                     <label className="bt-setting-checkbox" key={id}>
@@ -71,6 +79,36 @@ export function AboutPanel() {
                         )}
                     </div>
                 ))}
+                <label className="bt-setting-checkbox">
+                    <input
+                        type="checkbox"
+                        checked={!disabled.includes(hideBookmarkPricesId)}
+                        onChange={() => toggle(hideBookmarkPricesId)}
+                    />{' '}
+                    Show last observed prices in bookmarks
+                </label>
+                <div className="bt-setting-row">
+                    <label className="bt-setting-checkbox">
+                        <input
+                            type="radio"
+                            name="panel-side"
+                            value="right"
+                            checked={side === 'right'}
+                            onChange={() => setSide('right')}
+                        />{' '}
+                        Panel on the right
+                    </label>
+                    <label className="bt-setting-checkbox">
+                        <input
+                            type="radio"
+                            name="panel-side"
+                            value="left"
+                            checked={side === 'left'}
+                            onChange={() => setSide('left')}
+                        />{' '}
+                        Panel on the left
+                    </label>
+                </div>
                 {showShortcuts && (
                     <Dialog title="Search shortcuts" close={() => setShowShortcuts(false)}>
                         <div className="bt-shortcuts-reference">
@@ -79,24 +117,18 @@ export function AboutPanel() {
                     </Dialog>
                 )}
             </InfoBox>
-            <InfoBox title="GitHub">
+            <InfoBox title="Backup tools">
+                <BackupControls />
+            </InfoBox>
+            <InfoBox title="Better Trading">
+                <p>A better trading experience for Path of Exile and Path of Exile 2.</p>
+                <br />
                 <a
                     href="https://github.com/poe-world/better-trading"
                     className="bt-github-link"
                     target="_blank"
                     rel="noreferrer">
-                    <Icon name="github" /> View source and report issues here
-                </a>
-            </InfoBox>
-            <InfoBox title="Donate">
-                <p>Donate to keep this small fork alive.</p>
-                <a href="https://ko-fi.com/W7W7X8T7W" target="_blank" rel="noreferrer">
-                    <img
-                        className="bt-kofi-button"
-                        src="https://storage.ko-fi.com/cdn/kofi6.png?v=6"
-                        alt="Buy Me a Coffee at ko-fi.com"
-                        height={36}
-                    />
+                    <Icon name="github" /> View source and report issues
                 </a>
             </InfoBox>
             <InfoBox title="Credits">
@@ -108,6 +140,16 @@ export function AboutPanel() {
                     by <strong>brosmike</strong> (<a href="https://github.com/dbjorge">@dbjorge</a>
                     ).
                 </p>
+                <br />
+                <p>Donate to keep this small fork alive.</p>
+                <a href="https://ko-fi.com/W7W7X8T7W" target="_blank" rel="noreferrer">
+                    <img
+                        className="bt-kofi-button"
+                        src="https://storage.ko-fi.com/cdn/kofi6.png?v=6"
+                        alt="Buy Me a Coffee at ko-fi.com"
+                        height={36}
+                    />
+                </a>
             </InfoBox>
             <p className="bt-about-disclaimer">
                 Better Trading is not affiliated with Grinding Gear Games.

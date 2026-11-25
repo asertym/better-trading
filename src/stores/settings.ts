@@ -21,6 +21,9 @@ export const searchEnhancementIds = [
     'default-search-filter-tilde',
 ] as const
 
+// Bookmarks panel display options (not trade-site enhancers).
+export const hideBookmarkPricesId = 'hide-bookmark-prices' as const
+
 // Preserve opt-in defaults when introducing settings to existing installations.
 function initializeOptIn(flag: string, feature: string) {
     if (preferences.getItem(flag)) return

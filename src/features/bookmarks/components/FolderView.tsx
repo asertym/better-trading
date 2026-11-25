@@ -21,6 +21,8 @@ type Props = {
     onEdit: () => void
     onArchive: () => void
     onRemove: () => Promise<void>
+    /** Locally held trades (live drag preview / pending drop); falls back to the query data. */
+    previewTrades?: Trade[]
 }
 
 export function FolderView({
@@ -31,6 +33,7 @@ export function FolderView({
     onEdit,
     onArchive,
     onRemove,
+    previewTrades,
 }: Props) {
     const [deleteFolder, setDeleteFolder] = useState(false)
     const [draft, setDraft] = useState<Trade | null>(null)
@@ -38,7 +41,7 @@ export function FolderView({
     const [exported, setExported] = useState<string | null>(null)
     const [error, setError] = useState('')
     const { trades, mutation } = useFolderTrades(folder.id)
-    const items = trades.data ?? []
+    const items = previewTrades ?? trades.data ?? []
     const save = (next: Trade[], onSuccess?: () => void) => mutation.mutate(next, { onSuccess })
     const update = (trade: Trade, change: Partial<Trade>) =>
         save(items.map((item) => (item.id === trade.id ? { ...item, ...change } : item)))
@@ -82,6 +85,7 @@ export function FolderView({
             <Collapsible open={expanded && !folder.archivedAt}>
                 <div className="bt-folder-body">
                     <TradeList
+                        folderId={folder.id}
                         trades={items}
                         onComplete={(trade) =>
                             update(trade, {

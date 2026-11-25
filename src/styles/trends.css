@@ -21,13 +21,23 @@
 .bt-unique-trends summary::-webkit-details-marker {
     display: none;
 }
-.bt-unique-trends summary::before {
-    content: '▸';
+
+.bt-trends-pin {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
     color: #92abc2;
-    font-size: 9px;
+    cursor: pointer;
 }
-.bt-unique-trends[open] summary::before {
-    content: '▾';
+.bt-trends-pin .bt-icon {
+    width: 12px;
+    height: 12px;
+}
+.bt-trends-pin[aria-pressed='true'] {
+    color: #d1e4f5;
 }
 .bt-trends-source {
     color: #92abc2;

@@ -12,22 +12,24 @@ import { usePanelStore } from '../stores/panel'
 import { FeatureBoundary } from '../components/FeatureBoundary'
 
 export function ContentApp() {
-    const { page, collapsed, setPage, toggleCollapsed } = usePanelStore()
+    const { page, collapsed, side, setPage, toggleCollapsed } = usePanelStore()
     const [about, setAbout] = useState(false)
+    const paddingProp = side === 'left' ? 'paddingLeft' : 'paddingRight'
     useEffect(() => {
-        const previous = document.body.style.paddingRight
-        document.body.style.paddingRight = collapsed ? '0px' : '400px'
+        const previous = document.body.style[paddingProp]
+        document.body.style[paddingProp] = collapsed ? '0px' : '400px'
         return () => {
-            document.body.style.paddingRight = previous
+            document.body.style[paddingProp] = previous
         }
-    }, [collapsed])
+    }, [collapsed, side])
     return (
         <>
             <aside
                 aria-label="Better Trading"
-                className={`bt-panel ${collapsed ? 'collapsed' : ''} ${!collapsed && !about && page === 'bookmarks' ? 'bt-panel-bookmarks' : ''}`}>
+                className={`bt-panel ${side === 'left' ? 'bt-panel-left' : ''} ${collapsed ? 'collapsed' : ''} ${!collapsed && !about && page === 'bookmarks' ? 'bt-panel-bookmarks' : ''}`}>
                 <PanelHeader
                     collapsed={collapsed}
+                    side={side}
                     about={about}
                     onToggleCollapsed={toggleCollapsed}
                     onCloseAbout={() => setAbout(false)}

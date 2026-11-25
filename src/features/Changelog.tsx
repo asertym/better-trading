@@ -2,6 +2,7 @@ import { preferences } from '../lib/preferences'
 import { useState } from 'react'
 import { ReleaseNotes } from '../components/ReleaseNotes'
 import { Dialog } from '../components/Dialog'
+import { Icon } from '../components/Icon'
 import { currentRelease, releases } from '../lib/releases'
 import { isDismissed, normalizeDismissed } from '../lib/releases/model'
 
@@ -15,36 +16,35 @@ export function Changelog() {
         return dismissed
     })
     const [open, setOpen] = useState(false)
+    const dismiss = () => {
+        preferences.setItem('bt-dismissed-changelog', currentRelease.version)
+        setDismissed(true)
+    }
     if (dismissed) return null
     return (
         <>
-            <div className="bt-notice">
-                Better Trading v{currentRelease.version} has been updated.{' '}
-                <button onClick={() => setOpen(true)}>View changelog</button>
-            </div>
-            {open && (
-                <Dialog
-                    title={`What's new — v${currentRelease.version}`}
-                    close={() => setOpen(false)}>
-                    <ReleaseNotes markdown={currentRelease.markdown} />
-                    <button
-                        className="bt-button"
-                        onClick={() => {
-                            preferences.setItem('bt-dismissed-changelog', currentRelease.version)
-                            setDismissed(true)
-                        }}>
-                        Dismiss
+            <div className="bt-notice justify-between flex items-center">
+                <div className="flex gap-2">
+                    Better Trading v{currentRelease.version} has been updated.{' '}
+                    <button className="text-blue-300 cursor-pointer" onClick={() => setOpen(true)}>
+                        View changelog
                     </button>
-                </Dialog>
-            )}
+                </div>
+                <button
+                    className="cursor-pointer"
+                    aria-label="Dismiss update notice"
+                    onClick={dismiss}>
+                    <Icon name="close" />
+                </button>
+            </div>
+            {open && <ChangelogDialog close={() => setOpen(false)} />}
         </>
     )
 }
-export function ReleaseHistory() {
+export function ChangelogDialog({ close }: { close: () => void }) {
     return (
-        <div className="bt-info-box">
-            <h2>What's new — v{currentRelease.version}</h2>
+        <Dialog title={`What's new — v${currentRelease.version}`} close={close}>
             <ReleaseNotes markdown={currentRelease.markdown} />
-        </div>
+        </Dialog>
     )
 }

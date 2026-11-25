@@ -5,12 +5,14 @@ const logo = browser.runtime.getURL('/assets/images/logo.png')
 
 export function PanelHeader({
     collapsed,
+    side,
     about,
     onToggleCollapsed,
     onCloseAbout,
     onToggleAbout,
 }: {
     collapsed: boolean
+    side: 'left' | 'right'
     about: boolean
     onToggleCollapsed: () => void
     onCloseAbout: () => void
@@ -19,17 +21,17 @@ export function PanelHeader({
     return (
         <>
             <button
-                className={`bt-expand ${collapsed ? 'visible' : ''}`}
+                className={`bt-expand ${side === 'left' ? 'bt-expand-left' : ''} ${collapsed ? 'visible' : ''}`}
                 onClick={onToggleCollapsed}
                 aria-label="Expand Better Trading">
-                ‹ <img src={logo} alt="" />
+                <img src={logo} alt="" />
             </button>
             <header className="bt-header">
                 <button
                     className="bt-header-button"
                     onClick={onToggleCollapsed}
                     aria-label="Collapse Better Trading">
-                    ›
+                    <Icon name="sidebar" />
                 </button>
                 <button className="bt-brand" onClick={onCloseAbout}>
                     <img src={logo} alt="" />

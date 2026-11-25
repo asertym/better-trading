@@ -3,6 +3,7 @@ import { DragHandle } from '../../../components/Sortable'
 import { Icon } from '../../../components/Icon'
 import type { Folder } from '../../../lib/bookmarks/storage'
 import { iconUrl } from '../bookmarkUtils'
+import { Menu } from '@/features/bookmarks/components/Menu'
 
 export function FolderHeader({
     folder,
@@ -40,22 +41,17 @@ export function FolderHeader({
                     </span>
                 )}
             </button>
-            <details className="bt-menu">
-                <summary aria-label="Folder actions">
-                    <Icon name="options" />
-                </summary>
-                <div>
-                    {!folder.archivedAt && <button onClick={onEdit}>Edit folder</button>}
-                    {liveAction}
-                    <button onClick={onArchive}>
-                        {folder.archivedAt ? 'Restore folder' : 'Archive folder'}
-                    </button>
-                    {folder.archivedAt && <button onClick={onDelete}>Delete folder</button>}
-                    <button disabled={!canExport} onClick={onExport}>
-                        Export folder
-                    </button>
-                </div>
-            </details>
+            <Menu label="Folder actions">
+                {!folder.archivedAt && <button onClick={onEdit}>Edit folder</button>}
+                {liveAction}
+                <button onClick={onArchive}>
+                    {folder.archivedAt ? 'Restore folder' : 'Archive folder'}
+                </button>
+                {folder.archivedAt && <button onClick={onDelete}>Delete folder</button>}
+                <button disabled={!canExport} onClick={onExport}>
+                    Export folder
+                </button>
+            </Menu>
             <DragHandle label="Drag folder to reorder">
                 <Icon name="sort" />
             </DragHandle>
