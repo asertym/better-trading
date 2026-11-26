@@ -23,6 +23,12 @@ import {
     PushPinSlashIcon,
     BookmarkIcon,
     ClockCounterClockwiseIcon,
+    CheckIcon,
+    PencilIcon,
+    CopySimpleIcon,
+    FireSimpleIcon,
+    TrashIcon,
+    ArrowsClockwiseIcon,
 } from '@phosphor-icons/react'
 
 const icons = {
@@ -43,7 +49,13 @@ const icons = {
     pin: PushPinIcon,
     pinDisabled: PushPinSlashIcon,
     bookmarks: BookmarkIcon,
+    check: CheckIcon,
+    edit: PencilIcon,
+    copy: CopySimpleIcon,
+    fire: FireSimpleIcon,
     history: ClockCounterClockwiseIcon,
+    delete: TrashIcon,
+    update: ArrowsClockwiseIcon,
     'new-folder': PlusIcon,
     'import-folder': PlusSquareIcon,
 }

@@ -35,7 +35,7 @@ export function PanelHeader({
                 </button>
                 <button className="bt-brand" onClick={onCloseAbout}>
                     <img src={logo} alt="" />
-                    <span>Better Trading</span>
+                    <span>Better Trading+</span>
                 </button>
                 <button
                     className="bt-header-button"

@@ -87,17 +87,25 @@ export function FolderView({
                     <TradeList
                         folderId={folder.id}
                         trades={items}
-                        onComplete={(trade) =>
-                            update(trade, {
-                                completedAt: trade.completedAt ? null : new Date().toISOString(),
-                            })
-                        }
+                        onComplete={(trade) => {
+                            const completing = !trade.completedAt
+                            const updated: Trade = {
+                                ...trade,
+                                completedAt: completing ? new Date().toISOString() : null,
+                            }
+                            // Completed trades sink to the end of the list.
+                            save(
+                                completing
+                                    ? [...items.filter((item) => item.id !== trade.id), updated]
+                                    : items.map((item) => (item.id === trade.id ? updated : item))
+                            )
+                        }}
                         onEdit={(trade) => setDraft({ ...trade })}
                         onCopy={(trade) => {
                             const url = bookmarkUrl(trade)
                             if (!url)
                                 return setError(
-                                    'This link is invalid or no league is available. Open a valid search and use Update trade location.'
+                                    'This link is invalid or no league is available. Open a valid search and use Update from current search.'
                                 )
                             void navigator.clipboard
                                 .writeText(url)

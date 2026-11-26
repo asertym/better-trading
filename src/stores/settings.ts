@@ -4,16 +4,16 @@ import { create } from 'zustand'
 export const enhancerIds = [
     'equivalent-pricings',
     'highlight-stat-filters',
+    'coloured-meta-tags',
     'item-reference-links',
     'unique-price-sparklines',
-    'merged-live-searches',
 ] as const
 // Hidden and disabled by default: less useful in modern PoE.
 // 'maximum-sockets',
 // 'regroup-similars',
 export const searchEnhancementIds = [
     'search-history',
-    'coloured-meta-tags',
+    'merged-live-searches',
     'search-filter-shortcuts',
     'focus-item-search',
     'focus-stat-search',

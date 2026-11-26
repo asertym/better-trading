@@ -2,6 +2,10 @@
 @import './trends.css';
 @import './tags.css';
 
+@theme {
+    --font-display: 'FontinSmallcaps', serif;
+}
+
 .bt-league-notice {
     margin: 8px;
     padding: 10px;

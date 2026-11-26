@@ -39,7 +39,9 @@ export default {
         icons: { 128: 'assets/images/logo.png' },
         browser_specific_settings: {
             gecko: {
-                id: process.env.FIREFOX_EXTENSION_ID || 'better-trading@example.com',
+                // No id on first AMO submission: the placeholder is taken by the
+                // original add-on, so let AMO assign a fresh GUID, then set it in .env.release.
+                ...(process.env.FIREFOX_EXTENSION_ID ? { id: process.env.FIREFOX_EXTENSION_ID } : {}),
                 data_collection_permissions: {
                     required: ['none'],
                 },

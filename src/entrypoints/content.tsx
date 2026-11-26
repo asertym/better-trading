@@ -87,6 +87,10 @@ export default defineContentScript({
                 queryClient.clear()
             },
         })
+        // Dev reloads re-inject the content script without reliably tearing down
+        // the previous instance's shadow host (notably in Firefox), which stacks a
+        // second panel. Drop any stale hosts so only one UI is ever mounted.
+        document.querySelectorAll('better-trading').forEach((el) => el.remove())
         ui.mount()
     },
 })

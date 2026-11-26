@@ -42,13 +42,23 @@ export function FolderHeader({
                 )}
             </button>
             <Menu label="Folder actions">
-                {!folder.archivedAt && <button onClick={onEdit}>Edit folder</button>}
+                {!folder.archivedAt && (
+                    <button onClick={onEdit}>
+                        <Icon name="edit" className="size-5! mr-2" />
+                        Edit folder
+                    </button>
+                )}
                 {liveAction}
                 <button onClick={onArchive}>
+                    <Icon name="archive" className="size-5! mr-2" />
                     {folder.archivedAt ? 'Restore folder' : 'Archive folder'}
                 </button>
-                {folder.archivedAt && <button onClick={onDelete}>Delete folder</button>}
+                <button onClick={onDelete}>
+                    <Icon name="delete" className="size-5! mr-2" />
+                    Delete folder
+                </button>
                 <button disabled={!canExport} onClick={onExport}>
+                    <Icon name="export" className="size-5! mr-2" />
                     Export folder
                 </button>
             </Menu>
