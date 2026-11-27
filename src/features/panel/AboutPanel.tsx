@@ -146,7 +146,7 @@ export function AboutPanel() {
             <InfoBox title="Credits">
                 <p>
                     Better Trade+ is maintained by{' '}
-                    <a className="text-amber-600!" href="https://github.com/Vali-98">
+                    <a className="text-amber-600!" href="https://github.com/asertym">
                         <strong>asertym</strong>
                     </a>
                     . Original fork is mainatined by{' '}

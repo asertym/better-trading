@@ -6,6 +6,6 @@ export function reportIntegrationIssue(integration: string, operation: string) {
     if (reported.has(key)) return
     reported.add(key)
     console.warn(
-        `[Better Trading] ${integration}: ${operation}. The affected enhancement may be unavailable.`
+        `[Better Trading+] ${integration}: ${operation}. The affected enhancement may be unavailable.`
     )
 }

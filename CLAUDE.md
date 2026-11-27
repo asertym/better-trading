@@ -4,7 +4,7 @@ Guidance for AI coding assistants working in this repository.
 
 ## Project Overview
 
-**Better Trading** is a browser extension that enhances the `pathofexile.com` trade site for **Path of Exile (PoE1)** and **Path of Exile 2 (PoE2)**. It is a fork of [poe-world/better-trading](https://github.com/poe-world/better-trading), rebuilt from the ground up with support for both Chromium (Chrome) and Firefox builds.
+**Better Trading+** is a browser extension that enhances the `pathofexile.com` trade site for **Path of Exile (PoE1)** and **Path of Exile 2 (PoE2)**. It is a fork of [poe-world/better-trading](https://github.com/poe-world/better-trading), rebuilt from the ground up with support for both Chromium (Chrome) and Firefox builds.
 
 Core features:
 

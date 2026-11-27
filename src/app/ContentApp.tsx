@@ -25,7 +25,7 @@ export function ContentApp() {
     return (
         <>
             <aside
-                aria-label="Better Trading"
+                aria-label="Better Trading+"
                 className={`bt-panel ${side === 'left' ? 'bt-panel-left' : ''} ${collapsed ? 'collapsed' : ''} ${!collapsed && !about && page === 'bookmarks' ? 'bt-panel-bookmarks' : ''}`}>
                 <PanelHeader
                     collapsed={collapsed}
