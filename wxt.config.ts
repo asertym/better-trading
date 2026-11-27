@@ -7,7 +7,7 @@ export default {
     srcDir: 'src',
     modules: ['@wxt-dev/module-react'],
     zip: {
-        name: 'better-trading',
+        name: 'better-trading-plus',
         artifactTemplate: '{{name}}-{{version}}-{{browser}}.zip',
         sourcesTemplate: '{{name}}-{{version}}-sources.zip',
         excludeSources: [
@@ -21,8 +21,8 @@ export default {
         ],
     },
     manifest: {
-        name: 'Better PathOfExile Trading',
-        description: 'Enhancements for Path of Exile trading.',
+        name: 'PoE Better Trading+',
+        description: 'Search enhancements for Path of Exile trading.',
         permissions: ['storage'],
         host_permissions: ['https://poe.ninja/*'],
         web_accessible_resources: [
@@ -39,7 +39,14 @@ export default {
         icons: { 128: 'assets/images/logo.png' },
         browser_specific_settings: {
             gecko: {
-                id: process.env.FIREFOX_EXTENSION_ID || 'better-trading@example.com',
+                // No id on first AMO submission: the placeholder is taken by the
+                // original add-on, so let AMO assign a fresh GUID, then set it in .env.release.
+                ...(process.env.FIREFOX_EXTENSION_ID
+                    ? { id: process.env.FIREFOX_EXTENSION_ID }
+                    : {}),
+                data_collection_permissions: {
+                    required: ['none'],
+                },
             },
         },
     },

@@ -1,5 +1,5 @@
 import { reportIntegrationIssue } from '../integrations/diagnostics'
-import { recordTradePrice } from './bookmarks/storage'
+import { recordTradePrice, type TradePriceSnapshot } from './bookmarks/storage'
 import { bookmarkQueryKeys } from './bookmarks/queryKeys'
 import { subscribePageUpdates } from './page/updates'
 import { installEnhancer, disposeEnhancer } from './results/enhancers/isolation'
@@ -19,6 +19,7 @@ import { usePinnedStore } from '../stores/pinned'
 import { currentLocation } from '../integrations/poe-trade/location'
 import { getCurrencyRatios } from './prices/currencyRatios'
 import { createSimilarGroupState, regroupSimilarRows } from './results/similarGroups'
+import { takePendingBookmarkTrade, updateFirstListingPrice } from './results/pageCapture'
 import { addEquivalentPrices } from './results/enhancers/equivalentPricing'
 import { addPinButton } from './results/enhancers/pinning'
 import { addItemLinks } from './results/enhancers/itemLinks'
@@ -42,6 +43,20 @@ export function startResultsController(client: QueryClient) {
         { key: string; value?: Record<string, number>; retryAfter?: number } | undefined
     const pricedRows = new Set<HTMLElement>()
     const cleanups = new Map<HTMLElement, (() => void)[]>()
+    const toFirstListingPrice = (row: HTMLElement): TradePriceSnapshot | undefined => {
+        const price = readListingPrice(row)
+        return Number.isFinite(price.amount)
+            ? { amount: price.amount, currency: price.currency, icon: price.icon?.src }
+            : undefined
+    }
+    const consumeBookmarkCapture = (price: TradePriceSnapshot) => {
+        const tradeId = takePendingBookmarkTrade()
+        if (!tradeId) return
+        void recordTradePrice(tradeId, price).then((folderId) => {
+            if (folderId && !stopped)
+                client.invalidateQueries({ queryKey: bookmarkQueryKeys.trades(folderId) })
+        })
+    }
     const clearEnhancements = () => {
         for (const [row, disposers] of cleanups) {
             disposers.forEach(disposeEnhancer)
@@ -68,14 +83,19 @@ export function startResultsController(client: QueryClient) {
         running = true
         try {
             const rows = resultRows()
-            if (!rows.length && usePinnedStore.getState().pinned.length)
-                usePinnedStore.getState().setPinned([])
             for (const [row, disposers] of cleanups)
                 if (!row.isConnected) {
                     disposers.forEach(disposeEnhancer)
                     cleanups.delete(row)
                     pricedRows.delete(row)
                 }
+            const captured = updateFirstListingPrice(
+                rows[0] ? toFirstListingPrice(rows[0]) : undefined,
+                rows.some((row) => !cleanups.has(row))
+            )
+            if (captured) void consumeBookmarkCapture(captured)
+            if (!rows.length && usePinnedStore.getState().pinned.length)
+                usePinnedStore.getState().setPinned([])
             const disabled = useSettingsStore.getState().disabled
             const context = currentLocation()
             const ratioKey = `${context.version}/${context.league}`
@@ -122,22 +142,6 @@ export function startResultsController(client: QueryClient) {
                         highlightMatchingStats(row, needles)
                 })
                 if (!cleanups.has(row)) {
-                    if (rows[0] === row && sessionStorage.getItem('bt-bookmark-trade')) {
-                        const tradeId = sessionStorage.getItem('bt-bookmark-trade')!
-                        sessionStorage.removeItem('bt-bookmark-trade')
-                        const price = readListingPrice(row)
-                        if (Number.isFinite(price.amount))
-                            void recordTradePrice(tradeId, {
-                                amount: price.amount,
-                                currency: price.currency,
-                                icon: price.icon?.src,
-                            }).then((folderId) => {
-                                if (folderId && !stopped)
-                                    client.invalidateQueries({
-                                        queryKey: bookmarkQueryKeys.trades(folderId),
-                                    })
-                            })
-                    }
                     const disposers: (() => void)[] = []
                     cleanups.set(row, disposers)
                     row.setAttribute('bt-enhanced', '')

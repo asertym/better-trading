@@ -37,7 +37,7 @@ run(['run', 'typecheck'])
 run(['test'])
 run(['run', browser === 'chrome' ? 'zip' : 'zip:firefox'])
 const { version } = JSON.parse(readFileSync('package.json', 'utf8'))
-const zip = resolve(`.output/better-trading-${version}-${browser}.zip`)
+const zip = resolve(`.output/better-trading-plus-${version}-${browser}.zip`)
 const args = ['exec', '--', 'wxt', 'submit', `--${browser}-zip`, zip]
 if (browser === 'chrome') args.push('--chrome-skip-submit-review')
 else {
@@ -46,7 +46,7 @@ else {
         throw new Error('Built Firefox add-on ID does not match FIREFOX_EXTENSION_ID.')
     args.push(
         '--firefox-sources-zip',
-        resolve(`.output/better-trading-${version}-sources.zip`),
+        resolve(`.output/better-trading-plus-${version}-sources.zip`),
         '--firefox-channel',
         'listed'
     )

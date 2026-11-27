@@ -65,9 +65,18 @@ export function folderIcons(version: string, items: boolean) {
         )
 }
 
-export function reordered<T>(items: T[], from: number, to: number) {
-    const result = [...items]
-    const [item] = result.splice(from, 1)
-    result.splice(to, 0, item)
+// Move an item between (or within) container lists. `toIndex` is the target
+// position in the *original* list, matching dnd-kit's arrayMove semantics.
+export function moveTrade<T>(
+    containers: Record<string, T[]>,
+    fromFolder: string,
+    toFolder: string,
+    fromIndex: number,
+    toIndex: number,
+): Record<string, T[]> {
+    const result: Record<string, T[]> = {}
+    for (const [id, list] of Object.entries(containers)) result[id] = [...list]
+    const [item] = result[fromFolder].splice(fromIndex, 1)
+    result[toFolder].splice(toIndex, 0, item)
     return result
 }

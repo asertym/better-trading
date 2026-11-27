@@ -70,7 +70,7 @@ export default defineContentScript({
         ctx.onInvalidated(startFeature('Results', () => startResultsController(queryClient)))
         ctx.onInvalidated(startFeature('Search enhancements', startSearchEnhancements))
         const ui = await createShadowRootUi(ctx, {
-            name: 'better-trading',
+            name: 'better-trading-plus',
             position: 'inline',
             anchor: 'body',
             onMount(container) {
@@ -87,6 +87,10 @@ export default defineContentScript({
                 queryClient.clear()
             },
         })
+        // Dev reloads re-inject the content script without reliably tearing down
+        // the previous instance's shadow host (notably in Firefox), which stacks a
+        // second panel. Drop any stale hosts so only one UI is ever mounted.
+        document.querySelectorAll('better-trading-plus').forEach((el) => el.remove())
         ui.mount()
     },
 })

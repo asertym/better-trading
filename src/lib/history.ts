@@ -1,5 +1,6 @@
 import { currentLocation } from '../integrations/poe-trade/location'
 import { recommendTitle } from '../integrations/poe-trade/searchPanel'
+import { searchTitle } from '../integrations/poe-trade/searchQuery'
 import { getValue, setValue } from './storage'
 
 export interface HistoryEntry {
@@ -21,7 +22,7 @@ export async function getHistory() {
 
 export async function recordCurrentSearch() {
     const context = currentLocation()
-    if (!context.slug || !context.type || !context.league) return false
+    if (context.type !== 'search' || !context.slug || !context.league) return false
     const history = await getHistory()
     const alreadyCurrent =
         history[0] &&
@@ -29,13 +30,14 @@ export async function recordCurrentSearch() {
             (key) => history[0][key as keyof HistoryEntry] === context[key as keyof typeof context]
         )
     if (alreadyCurrent) return false
+    const title = (await searchTitle(context.slug, context.version)) || recommendTitle()
     await setValue(
         'trade-history',
         [
             {
                 ...context,
                 id: crypto.randomUUID(),
-                title: recommendTitle(),
+                title,
                 createdAt: new Date().toISOString(),
             },
             ...history,

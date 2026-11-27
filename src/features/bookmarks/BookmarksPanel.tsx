@@ -3,14 +3,15 @@ import { useLiveSearchTargets } from '../liveSearch/useLiveSearchTargets'
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Icon } from '../../components/Icon'
-import { SortableItem, SortableList } from '../../components/Sortable'
+import { DndProvider, SortableGroup, SortableItem } from '../../components/Sortable'
+import { FOLDER_DATA } from '../../components/sortableCollision'
 import { currentLocation } from '../../integrations/poe-trade/location'
 import { getFolders, saveFolders, removeFolder, type Folder } from '../../lib/bookmarks/storage'
 import { bookmarkQueryKeys } from '../../lib/bookmarks/queryKeys'
-import { BackupControls } from './BackupControls'
-import { reordered } from './bookmarkUtils'
+import { DragPreview } from './components/DragPreview'
 import { FolderEditorDialog } from './components/FolderEditorDialog'
 import { FolderView } from './components/FolderView'
+import { useBookmarkDnd, useServerTrades } from './hooks/useBookmarkDnd'
 import { useExpandedFolders } from './hooks/useExpandedFolders'
 import { useBookmarkLeague } from './hooks/useBookmarkLeague'
 
@@ -20,9 +21,18 @@ export function BookmarksPanel() {
     const client = useQueryClient()
     const folders = useQuery({ queryKey: bookmarkQueryKeys.folders(), queryFn: getFolders })
     const [archived, setArchived] = useState(false)
-    const [importing, setImporting] = useState(false)
     const [editing, setEditing] = useState<Folder | null>(null)
     const { expanded, setExpanded: expand, toggle } = useExpandedFolders()
+
+    const { version } = currentLocation()
+    const visible = (folder: Folder) =>
+        folder.version === version && Boolean(folder.archivedAt) === archived
+    const serverFolders = folders.data ?? []
+    // Trades for every visible folder, so a drag can be routed between folders.
+    const serverTrades = useServerTrades(serverFolders.filter(visible))
+    // All drag state (folder/trade reordering, live cross-folder moves, persistence).
+    const dnd = useBookmarkDnd({ folders: serverFolders, visible, expanded, serverTrades })
+
     const mutation = useMutation({
         mutationFn: saveFolders,
         onMutate: async (items) => {
@@ -36,23 +46,22 @@ export function BookmarksPanel() {
         mutationFn: removeFolder,
         onSettled: () => client.invalidateQueries({ queryKey: bookmarkQueryKeys.all }),
     })
-    const reorderMutation = useMutation({
-        mutationFn: saveFolders,
-        meta: { silentSuccess: true },
-        onSettled: () => client.invalidateQueries({ queryKey: bookmarkQueryKeys.folders() }),
-    })
-    const allFolders = folders.data ?? []
-    const visibleFolders = allFolders.filter(
-        (folder) =>
-            folder.version === currentLocation().version && Boolean(folder.archivedAt) === archived
-    )
+
+    const toggleArchive = (folder: Folder) =>
+        mutation.mutate([
+            ...dnd.folders.filter((item) => item.id !== folder.id),
+            {
+                ...folder,
+                archivedAt: folder.archivedAt ? null : new Date().toISOString(),
+            },
+        ])
     const saveEditing = () => {
         if (!editing) return
-        const exists = allFolders.some((folder) => folder.id === editing.id)
+        const exists = dnd.folders.some((folder) => folder.id === editing.id)
         mutation.mutate(
             exists
-                ? allFolders.map((folder) => (folder.id === editing.id ? editing : folder))
-                : [...allFolders, editing],
+                ? dnd.folders.map((folder) => (folder.id === editing.id ? editing : folder))
+                : [...dnd.folders, editing],
             {
                 onSuccess: () => {
                     expand([...expanded, editing.id])
@@ -68,56 +77,44 @@ export function BookmarksPanel() {
                     {league.warning}
                 </p>
             )}
-            <div className="bt-bookmark-toolbar">
-                <button className="bt-button" onClick={() => expand([])}>
+            <div className="bt-bookmark-toolbar flex">
+                <button className="bt-button w-full" onClick={() => expand([])}>
                     <Icon name="collapse" /> Collapse all
                 </button>
-                <button className="bt-button" onClick={() => setArchived(!archived)}>
+                <button className="bt-button w-full" onClick={() => setArchived(!archived)}>
                     <Icon name={archived ? 'undo' : 'archive'} />{' '}
                     {archived ? 'Show active' : 'Show archived'}
                 </button>
             </div>
             {folders.isPending && <p role="status">Loading bookmarks…</p>}
-            {(folders.error || mutation.error || removeMutation.error) && (
+            {(folders.error || mutation.error || removeMutation.error || dnd.error) && (
                 <p role="alert">Unable to save or load bookmarks.</p>
             )}
             <div className="bt-folder-list">
-                <SortableList
-                    ids={visibleFolders.map((folder) => folder.id)}
-                    onMove={(from, to) => {
-                        const ordered = reordered(visibleFolders, from, to)
-                        let index = 0
-                        const updated = allFolders.map((folder) =>
-                            visibleFolders.includes(folder) ? ordered[index++] : folder
-                        )
-                        client.setQueryData(bookmarkQueryKeys.folders(), updated)
-                        reorderMutation.mutate(updated)
-                    }}>
-                    {visibleFolders.map((folder) => (
-                        <SortableItem id={folder.id} key={folder.id} className="bt-folder-wrapper">
-                            <FeatureBoundary name="Bookmark folder">
-                                <FolderView
-                                    folder={folder}
-                                    expanded={expanded.includes(folder.id)}
-                                    onToggle={() => toggle(folder.id)}
-                                    onEdit={() => setEditing({ ...folder })}
-                                    onArchive={() =>
-                                        mutation.mutate([
-                                            ...allFolders.filter((item) => item.id !== folder.id),
-                                            {
-                                                ...folder,
-                                                archivedAt: folder.archivedAt
-                                                    ? null
-                                                    : new Date().toISOString(),
-                                            },
-                                        ])
-                                    }
-                                    onRemove={() => removeMutation.mutateAsync(folder.id)}
-                                />
-                            </FeatureBoundary>
-                        </SortableItem>
-                    ))}
-                </SortableList>
+                <DndProvider {...dnd.provider} overlay={<DragPreview item={dnd.overlayItem} />}>
+                    <SortableGroup ids={dnd.visibleFolders.map((folder) => folder.id)}>
+                        {dnd.visibleFolders.map((folder) => (
+                            <SortableItem
+                                id={folder.id}
+                                key={folder.id}
+                                data={FOLDER_DATA}
+                                className="bt-folder-wrapper">
+                                <FeatureBoundary name="Bookmark folder">
+                                    <FolderView
+                                        isDropTarget={folder.id === dnd.dropFolderId}
+                                        previewTrades={dnd.trades[folder.id]}
+                                        folder={folder}
+                                        expanded={expanded.includes(folder.id)}
+                                        onToggle={() => toggle(folder.id)}
+                                        onEdit={() => setEditing({ ...folder })}
+                                        onArchive={() => toggleArchive(folder)}
+                                        onRemove={() => removeMutation.mutateAsync(folder.id)}
+                                    />
+                                </FeatureBoundary>
+                            </SortableItem>
+                        ))}
+                    </SortableGroup>
+                </DndProvider>
             </div>
             {!archived && (
                 <div className="bt-folder-create-actions">
@@ -128,15 +125,12 @@ export function BookmarksPanel() {
                             setEditing({
                                 id: crypto.randomUUID(),
                                 title: '',
-                                version: currentLocation().version,
+                                version,
                                 icon: null,
                                 archivedAt: null,
                             })
                         }>
                         <Icon name="new-folder" /> New folder
-                    </button>
-                    <button className="bt-button" onClick={() => setImporting(true)}>
-                        <Icon name="import-folder" /> Import folder
                     </button>
                 </div>
             )}
@@ -144,13 +138,12 @@ export function BookmarksPanel() {
                 <FolderEditorDialog
                     folder={editing}
                     saving={mutation.isPending}
-                    isExisting={allFolders.some((folder) => folder.id === editing.id)}
+                    isExisting={dnd.folders.some((folder) => folder.id === editing.id)}
                     onChange={setEditing}
                     onSave={saveEditing}
                     onClose={() => setEditing(null)}
                 />
             )}
-            <BackupControls importing={importing} closeImport={() => setImporting(false)} />
         </section>
     )
 }

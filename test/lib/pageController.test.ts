@@ -37,3 +37,66 @@ it('uses healthy bookmark titles when history and another folder fail', async ()
         client.clear()
     }
 })
+const calls = () => vi.mocked(recordCurrentSearch).mock.calls.length
+async function startController() {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(document, 'hasFocus').mockReturnValue(true)
+    window.history.replaceState({}, '', '/trade/search/Standard/a')
+    document.title = 'Trade'
+    vi.mocked(recordCurrentSearch).mockResolvedValue(true)
+    vi.mocked(getFolders).mockResolvedValue([])
+    const client = new QueryClient()
+    const stop = startPageController(client)
+    return {
+        stop: () => {
+            stop()
+            client.clear()
+        },
+    }
+}
+it('records a submitted search even when the slug does not change', async () => {
+    const before = calls()
+    const controller = await startController()
+    try {
+        await vi.waitFor(() => expect(calls()).toBe(before + 1))
+        // Typing filters rewrites the slug without any submission.
+        window.history.replaceState({}, '', '/trade/search/Standard/b')
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        expect(calls()).toBe(before + 1)
+        // Clicking Search does not change the URL: the slug already holds it.
+        const button = document.createElement('button')
+        button.className = 'search-btn'
+        document.body.append(button)
+        button.click()
+        await vi.waitFor(() => expect(calls()).toBe(before + 2))
+    } finally {
+        controller.stop()
+    }
+})
+it('does not record filter-only URL changes', async () => {
+    const before = calls()
+    const controller = await startController()
+    try {
+        await vi.waitFor(() => expect(calls()).toBe(before + 1))
+        window.history.replaceState({}, '', '/trade/search/Standard/b')
+        await new Promise((resolve) => setTimeout(resolve, 800))
+        expect(calls()).toBe(before + 1)
+    } finally {
+        controller.stop()
+    }
+})
+it('records when the search button is clicked', async () => {
+    const before = calls()
+    const controller = await startController()
+    try {
+        await vi.waitFor(() => expect(calls()).toBe(before + 1))
+        const button = document.createElement('button')
+        button.className = 'search-btn'
+        document.body.append(button)
+        button.click()
+        window.history.replaceState({}, '', '/trade/search/Standard/b')
+        await vi.waitFor(() => expect(calls()).toBe(before + 2))
+    } finally {
+        controller.stop()
+    }
+})

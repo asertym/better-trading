@@ -1,10 +1,10 @@
-![Better Trading logo](public/assets/images/logo.png)
+![Better Trading+ logo](public/assets/images/logo.png)
 
-# Better Trading
+# Better Trading+
 
 A browser extension that enhances the pathofexile.com trade site experience for Path of Exile and Path of Exile 2.
 
-This fork maintains existing Better Trading features, with support for both Firefox and Chromium builds, rebuilt from the ground up.
+This fork maintains existing Better Trading features, with support for both Firefox and Chromium builds.
 
 ## Features
 
@@ -21,21 +21,21 @@ This fork maintains existing Better Trading features, with support for both Fire
 
 ## Contributing
 
-1. Install a current Node.js LTS release and npm.
-2. Install dependencies with `npm install`.
-3. Run `npm run dev` for Chrome or `npm run dev:firefox` for Firefox.
+1. Install a current Node.js LTS release and pnpm.
+2. Install dependencies with `pnpm install`.
+3. Run `pnpm run dev` for Chrome or `pnpm run dev:firefox` for Firefox.
 
 Development launches use separate persistent browser profiles in `.dev-profiles/`,
 so logins and test data survive restarts.
 
-Run `npm run typecheck` and `npm test` to check changes. Tests mirror `src/` under `test/`, with fixtures beside the integration tests.
+Run `pnpm run typecheck` and `pnpm test` to check changes. Tests mirror `src/` under `test/`, with fixtures beside the integration tests.
 
 ## Building and packaging
 
-| Browser | Build                   | Package               |
-| ------- | ----------------------- | --------------------- |
-| Chrome  | `npm run build`         | `npm run zip`         |
-| Firefox | `npm run build:firefox` | `npm run zip:firefox` |
+| Browser | Build                    | Package                |
+| ------- | ------------------------ | ---------------------- |
+| Chrome  | `pnpm run build`         | `pnpm run zip`         |
+| Firefox | `pnpm run build:firefox` | `pnpm run zip:firefox` |
 
 Builds and extension archives are generated in `.output/`.
 
@@ -46,7 +46,7 @@ notes loaded from `changelogs/<version>.md`. When releasing, update the version
 and add the corresponding Markdown file with a title and Added, Changed, or
 Fixed sections.
 
-Run `npm run check:changelog` to validate. Build and package commands run this
+Run `pnpm run check:changelog` to validate. Build and package commands run this
 check automatically. Only the current release notes are bundled with the
 extension and shown in the update dialog and information panel.
 
@@ -56,8 +56,8 @@ First create and commit the next version's `changelogs/<version>.md`, and merge
 all changes into `master` (or `main`). Then run:
 
 ```bash
-npm run release -- patch       # Or minor / major: create a local version commit and tag
-npm run release -- patch -y    # Also push the branch and tag to origin
+pnpm run release -- patch     # Or minor / major: create a local version commit and tag
+pnpm run release -- patch -y  # Also push the branch and tag to origin
 ```
 
 The script validates the next changelog and requires a clean working tree before
@@ -66,18 +66,22 @@ command. GitHub Actions tests, packages both browsers, and publishes the release
 Use `make upload-firefox` separately for Firefox submission. Download the Chrome
 ZIP from the GitHub release and upload it manually to the Chrome Web Store.
 
-Git hooks are installed automatically by `npm install`. A pre-commit check
+Git hooks are installed automatically by `pnpm install`. A pre-commit check
 validates staged `package.json` version changes; a pre-push check validates
 version tags. The workflow repeats both checks, so release validation cannot be
 bypassed by skipping local hooks.
 
 ## Credits
 
-This form is maintained by [Vali-98](https://github.com/Vali-98).
+Better Trading+ is maintained by [asertym](https://github.com/asertym).
+Original fork is maintained by [Vali-98](https://github.com/Vali-98).
 Better Trading was originally created by [InfaMc](https://github.com/pboutin)
 and previously maintained by [brosmike](https://github.com/dbjorge).
 
-[Original repository](https://github.com/poe-world/better-trading) ·
-[Support development on Ko-fi](https://ko-fi.com/W7W7X8T7W)
+[Original repository](https://github.com/poe-world/better-trading)
+
+<a href="https://www.buymeacoffee.com/asertym">
+  <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=asertym&button_colour=5F7FFF&font_colour=ffffff&outline_colour=000000&coffee_colour=FFDD00" alt="Buy me a coffee" />
+</a>
 
 This extension is fan-made and is not affiliated with Grinding Gear Games.

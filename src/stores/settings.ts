@@ -4,22 +4,25 @@ import { create } from 'zustand'
 export const enhancerIds = [
     'equivalent-pricings',
     'highlight-stat-filters',
+    'coloured-meta-tags',
     'item-reference-links',
     'unique-price-sparklines',
-    'merged-live-searches',
 ] as const
 // Hidden and disabled by default: less useful in modern PoE.
 // 'maximum-sockets',
 // 'regroup-similars',
 export const searchEnhancementIds = [
     'search-history',
-    'coloured-meta-tags',
+    'merged-live-searches',
     'search-filter-shortcuts',
     'focus-item-search',
     'focus-stat-search',
     'default-stat-filter-tilde',
     'default-search-filter-tilde',
 ] as const
+
+// Bookmarks panel display options (not trade-site enhancers).
+export const hideBookmarkPricesId = 'hide-bookmark-prices' as const
 
 // Preserve opt-in defaults when introducing settings to existing installations.
 function initializeOptIn(flag: string, feature: string) {

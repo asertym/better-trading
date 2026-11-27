@@ -6,29 +6,12 @@
     font-size: 11px;
 }
 .bt-unique-trends summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     list-style: none;
-    cursor: pointer;
-    padding: 7px 9px;
-    background: #0f304d;
-    color: #92abc2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 .bt-unique-trends summary::-webkit-details-marker {
     display: none;
 }
-.bt-unique-trends summary::before {
-    content: '▸';
-    color: #92abc2;
-    font-size: 9px;
-}
-.bt-unique-trends[open] summary::before {
-    content: '▾';
-}
+
 .bt-trends-source {
     color: #92abc2;
     font-size: 10px;

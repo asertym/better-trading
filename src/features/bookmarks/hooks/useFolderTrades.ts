@@ -15,10 +15,5 @@ export function useFolderTrades(folderId: string) {
         onError: () => client.invalidateQueries({ queryKey }),
         onSuccess: () => client.invalidateQueries({ queryKey }),
     })
-    const reorderMutation = useMutation({
-        mutationFn: (items: Trade[]) => saveTrades(folderId, items),
-        meta: { silentSuccess: true },
-        onSettled: () => client.invalidateQueries({ queryKey }),
-    })
-    return { trades, mutation, reorderMutation, queryKey, client }
+    return { trades, mutation }
 }

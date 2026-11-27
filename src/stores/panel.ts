@@ -2,11 +2,14 @@ import { preferences } from '../lib/preferences'
 import { create } from 'zustand'
 
 export type PanelPage = 'bookmarks' | 'history' | 'pinned-items'
+export type PanelSide = 'left' | 'right'
 interface PanelState {
     page: PanelPage
     collapsed: boolean
+    side: PanelSide
     setPage: (page: PanelPage) => void
     toggleCollapsed: () => void
+    setSide: (side: PanelSide) => void
 }
 
 export const usePanelStore = create<PanelState>((set) => ({
@@ -26,4 +29,10 @@ export const usePanelStore = create<PanelState>((set) => ({
             else preferences.setItem('bt-side-panel-collapsed', 'true')
             return { collapsed: !state.collapsed }
         }),
+    side: preferences.getItem('bt-panel-side') === 'left' ? 'left' : 'right',
+    setSide: (side) => {
+        if (side === 'left') preferences.setItem('bt-panel-side', side)
+        else preferences.removeItem('bt-panel-side')
+        set({ side })
+    },
 }))

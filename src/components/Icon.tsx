@@ -1,49 +1,72 @@
 import {
-    faSearch,
-    faTimes,
-    faSort,
-    faFileExport,
-    faFileImport,
-    faQuestionCircle,
-    faInfoCircle,
-    faChevronDown,
-    faEllipsisH,
-    faCompressAlt,
-    faArchive,
-    faUndo,
-    faFolderPlus,
-    faPlusSquare,
-} from '@fortawesome/free-solid-svg-icons'
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
+    MagnifyingGlassIcon,
+    GithubLogoIcon,
+    XIcon,
+    ArrowsDownUpIcon,
+    ExportIcon,
+    DownloadIcon,
+    QuestionIcon,
+    InfoIcon,
+    GearIcon,
+    CaretDownIcon,
+    DotsThreeIcon,
+    ArrowsInIcon,
+    ArchiveIcon,
+    ArrowCounterClockwiseIcon,
+    FolderPlusIcon,
+    PlusSquareIcon,
+    SidebarIcon,
+    CaretUpDownIcon,
+    DotsThreeVerticalIcon,
+    PlusIcon,
+    PushPinIcon,
+    PushPinSlashIcon,
+    BookmarkIcon,
+    ClockCounterClockwiseIcon,
+    CheckIcon,
+    PencilIcon,
+    CopySimpleIcon,
+    FireSimpleIcon,
+    TrashIcon,
+    ArrowsClockwiseIcon,
+} from '@phosphor-icons/react'
+
 const icons = {
-    search: faSearch,
-    github: faGithub,
-    close: faTimes,
-    sort: faSort,
-    export: faFileExport,
-    import: faFileImport,
-    help: faQuestionCircle,
-    info: faInfoCircle,
-    chevron: faChevronDown,
-    options: faEllipsisH,
-    collapse: faCompressAlt,
-    archive: faArchive,
-    undo: faUndo,
-    'new-folder': faFolderPlus,
-    'import-folder': faPlusSquare,
+    search: MagnifyingGlassIcon,
+    github: GithubLogoIcon,
+    close: XIcon,
+    sort: CaretUpDownIcon,
+    export: ExportIcon,
+    import: DownloadIcon,
+    help: QuestionIcon,
+    info: GearIcon,
+    chevron: CaretDownIcon,
+    options: DotsThreeVerticalIcon,
+    collapse: ArrowsInIcon,
+    sidebar: SidebarIcon,
+    archive: ArchiveIcon,
+    undo: ArrowCounterClockwiseIcon,
+    pin: PushPinIcon,
+    pinDisabled: PushPinSlashIcon,
+    bookmarks: BookmarkIcon,
+    check: CheckIcon,
+    edit: PencilIcon,
+    copy: CopySimpleIcon,
+    fire: FireSimpleIcon,
+    history: ClockCounterClockwiseIcon,
+    delete: TrashIcon,
+    update: ArrowsClockwiseIcon,
+    'new-folder': PlusIcon,
+    'import-folder': PlusSquareIcon,
 }
-export function Icon({ name }: { name: keyof typeof icons }) {
-    const [width, height, , , paths] = icons[name].icon
+
+export function Icon({ name, className }: { name: keyof typeof icons; className?: string }) {
+    const I = icons[name]
     return (
-        <svg
-            className="bt-icon"
-            viewBox={`0 0 ${width} ${height}`}
+        <I
+            className={className ? `bt-icon ${className}` : 'bt-icon'}
             aria-hidden="true"
             focusable="false"
-            style={{ fill: 'currentColor', stroke: 'none' }}>
-            {(Array.isArray(paths) ? paths : [paths]).map((path, index) => (
-                <path key={index} d={path} />
-            ))}
-        </svg>
+        />
     )
 }

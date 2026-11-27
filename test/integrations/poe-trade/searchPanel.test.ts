@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it } from 'vitest'
-import { searchedStats } from '../../../src/integrations/poe-trade/searchPanel'
+import {
+    recommendTitle,
+    searchedStats,
+} from '../../../src/integrations/poe-trade/searchPanel'
 
 afterEach(() => {
     document.body.innerHTML = ''
@@ -10,6 +13,12 @@ it('includes pseudo stat filters in result highlighting', () => {
     document.body.innerHTML =
         '<div class="search-advanced-pane"><div class="filter-group-body"><div class="filter"><div class="filter-title"><i class="mutate-type">pseudo</i><span>+# to Strength</span></div></div><div class="filter"><div class="filter-title"><i class="mutate-type">explicit</i><span>+# to maximum Life</span></div></div></div></div>'
     expect(searchedStats()).toEqual(['+# to strength', '+# to maximum life'])
+})
+
+it('falls back to the selected stats when no item name or category is set', () => {
+    document.body.innerHTML =
+        '<div class="search-advanced-pane"><div class="filter-group-body"><div class="filter"><div class="filter-title"><i class="mutate-type">explicit</i><span>+# to Strength</span></div></div><div class="filter"><div class="filter-title"><i class="mutate-type">itemLevel</i><span>40</span></div></div></div></div>'
+    expect(recommendTitle()).toBe('+# to strength · 40')
 })
 
 it('ignores ordinary field headings when collecting selected stat filters', () => {

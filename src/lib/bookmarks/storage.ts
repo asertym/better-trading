@@ -1,12 +1,17 @@
 import { browser } from 'wxt/browser'
 import { getValue, setValue } from '../storage'
 
+export interface TradePriceSnapshot {
+    amount: number
+    currency: string
+    icon?: string
+}
 export interface Trade {
     id: string
     title: string
     completedAt: string | null
     location: { version: '1' | '2'; type: string; slug: string }
-    lastObservedPrice?: { amount: number; currency: string; icon?: string }
+    lastObservedPrice?: TradePriceSnapshot
 }
 export interface Folder {
     id: string
@@ -35,7 +40,7 @@ export const saveTrades = (id: string, trades: Trade[]) =>
 // Find the folder holding the trade and overwrite its last observed price.
 export async function recordTradePrice(
     tradeId: string,
-    price: NonNullable<Trade['lastObservedPrice']>
+    price: TradePriceSnapshot
 ): Promise<string | null> {
     for (const folder of await getFolders()) {
         const trades = await getTrades(folder.id)

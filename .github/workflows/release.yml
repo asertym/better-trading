@@ -30,4 +30,4 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                   body_path: changelogs/${{ steps.version.outputs.value }}.md
-                  files: .output/better-trading-*.zip
+                  files: .output/better-trading-plus-*.zip

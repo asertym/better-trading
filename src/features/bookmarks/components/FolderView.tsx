@@ -5,9 +5,9 @@ import { Collapsible } from '../../../components/Collapsible'
 import { Dialog } from '../../../components/Dialog'
 import { serialize } from '../../../lib/bookmarks/export'
 import { currentLocation } from '../../../integrations/poe-trade/location'
+import { getFirstListingPrice } from '../../../lib/results/pageCapture'
 import { type Folder, type Trade } from '../../../lib/bookmarks/storage'
 import { recommendTitle } from '../../../integrations/poe-trade/searchPanel'
-import { reordered } from '../bookmarkUtils'
 import { useFolderTrades } from '../hooks/useFolderTrades'
 import { FolderHeader } from './FolderHeader'
 import { TradeEditorDialog } from './TradeEditorDialog'
@@ -16,20 +16,32 @@ import { TradeList } from './TradeList'
 type Props = {
     folder: Folder
     expanded: boolean
+    isDropTarget?: boolean
     onToggle: () => void
     onEdit: () => void
     onArchive: () => void
     onRemove: () => Promise<void>
+    /** Locally held trades (live drag preview / pending drop); falls back to the query data. */
+    previewTrades?: Trade[]
 }
 
-export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRemove }: Props) {
+export function FolderView({
+    folder,
+    expanded,
+    isDropTarget = false,
+    onToggle,
+    onEdit,
+    onArchive,
+    onRemove,
+    previewTrades,
+}: Props) {
     const [deleteFolder, setDeleteFolder] = useState(false)
     const [draft, setDraft] = useState<Trade | null>(null)
     const [deleting, setDeleting] = useState<Trade | null>(null)
     const [exported, setExported] = useState<string | null>(null)
     const [error, setError] = useState('')
-    const { client, queryKey, trades, mutation, reorderMutation } = useFolderTrades(folder.id)
-    const items = trades.data ?? []
+    const { trades, mutation } = useFolderTrades(folder.id)
+    const items = previewTrades ?? trades.data ?? []
     const save = (next: Trade[], onSuccess?: () => void) => mutation.mutate(next, { onSuccess })
     const update = (trade: Trade, change: Partial<Trade>) =>
         save(items.map((item) => (item.id === trade.id ? { ...item, ...change } : item)))
@@ -48,10 +60,17 @@ export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRe
     const register = () => {
         const { league: _, ...location } = currentLocation()
         if (!location.slug) return setError('Run a trade search before registering it.')
-        setDraft({ id: crypto.randomUUID(), title: recommendTitle(), location, completedAt: null })
+        const price = getFirstListingPrice()
+        setDraft({
+            id: crypto.randomUUID(),
+            title: recommendTitle(),
+            location,
+            completedAt: null,
+            ...(price ? { lastObservedPrice: price } : {}),
+        })
     }
     return (
-        <div className="bt-folder">
+        <div className={isDropTarget ? 'bt-folder is-drop-target' : 'bt-folder'}>
             <FolderHeader
                 folder={folder}
                 expanded={expanded}
@@ -66,23 +85,27 @@ export function FolderView({ folder, expanded, onToggle, onEdit, onArchive, onRe
             <Collapsible open={expanded && !folder.archivedAt}>
                 <div className="bt-folder-body">
                     <TradeList
+                        folderId={folder.id}
                         trades={items}
-                        onMove={(from, to) => {
-                            const next = reordered(items, from, to)
-                            client.setQueryData(queryKey, next)
-                            reorderMutation.mutate(next)
+                        onComplete={(trade) => {
+                            const completing = !trade.completedAt
+                            const updated: Trade = {
+                                ...trade,
+                                completedAt: completing ? new Date().toISOString() : null,
+                            }
+                            // Completed trades sink to the end of the list.
+                            save(
+                                completing
+                                    ? [...items.filter((item) => item.id !== trade.id), updated]
+                                    : items.map((item) => (item.id === trade.id ? updated : item))
+                            )
                         }}
-                        onComplete={(trade) =>
-                            update(trade, {
-                                completedAt: trade.completedAt ? null : new Date().toISOString(),
-                            })
-                        }
                         onEdit={(trade) => setDraft({ ...trade })}
                         onCopy={(trade) => {
                             const url = bookmarkUrl(trade)
                             if (!url)
                                 return setError(
-                                    'This link is invalid or no league is available. Open a valid search and use Update trade location.'
+                                    'This link is invalid or no league is available. Open a valid search and use Update from current search.'
                                 )
                             void navigator.clipboard
                                 .writeText(url)

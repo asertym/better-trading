@@ -4,14 +4,10 @@ import { downloadBackup, readBackupFile } from '../../lib/bookmarks/fileTransfer
 import { Dialog } from '../../components/Dialog'
 import { useBackupRestore } from './hooks/useBackupRestore'
 
-export function BackupControls({
-    importing,
-    closeImport,
-}: {
-    importing: boolean
-    closeImport: () => void
-}) {
+export function BackupControls() {
     const fileInput = useRef<HTMLInputElement>(null)
+    const [importing, setImporting] = useState(false)
+    const closeImport = () => setImporting(false)
     const [code, setCode] = useState('')
     const { busy, error, setError, restore } = useBackupRestore(() => {
         closeImport()
@@ -19,7 +15,6 @@ export function BackupControls({
     })
     return (
         <div className="bt-backup-tools">
-            <span className="bt-backup-title">Backup Tools</span>
             {importing && (
                 <Dialog title="Import folder" close={closeImport}>
                     <form
@@ -57,6 +52,16 @@ export function BackupControls({
                     <Icon name="export" />
                 </span>{' '}
                 Save File
+            </button>
+            <button
+                type="button"
+                className="bt-backup-action"
+                disabled={busy}
+                onClick={() => setImporting(true)}>
+                <span className="bt-backup-icon">
+                    <Icon name="import-folder" />
+                </span>{' '}
+                Import folder
             </button>
             <button
                 type="button"
