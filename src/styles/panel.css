@@ -109,7 +109,7 @@
 }
 .bt-brand img,
 .bt-expand img {
-    height: 30px;
+    height: 32px;
 }
 .bt-brand span {
     margin-left: 10px;
@@ -685,8 +685,8 @@
 }
 .bt-dialog-logo {
     flex-shrink: 0;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
 }
 .bt-dialog input:focus-visible,

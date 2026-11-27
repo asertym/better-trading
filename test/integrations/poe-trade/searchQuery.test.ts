@@ -1,6 +1,9 @@
 import { expect, it, vi } from 'vitest'
 import { gzipSync } from 'node:zlib'
-import { searchItemName } from '../../../src/integrations/poe-trade/searchQuery'
+vi.mock('wxt/browser', () => ({
+    browser: { storage: { local: { get: vi.fn(async () => ({})), set: vi.fn(async () => {}) } } },
+}))
+import { searchItemName, searchTitle } from '../../../src/integrations/poe-trade/searchQuery'
 import { searchTrendPrices } from '../../../src/features/trends/matchPrices'
 
 it('reads the selected unique from the compressed search rather than stale result data', async () => {
@@ -11,6 +14,91 @@ it('reads the selected unique from the compressed search rather than stale resul
 })
 it('uses the search field for short links', async () => {
     expect(await searchItemName('abc123', 'Original Sin')).toBe('Original Sin')
+})
+it('derives stat-only titles from the catalog instead of the DOM', async () => {
+    const slug = gzipSync(
+        JSON.stringify({ stats: [{ type: 'and', filters: [{ id: 'explicit.left' }] }] })
+    ).toString('base64url')
+    const fetch = vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+            result: [
+                {
+                    entries: [
+                        { id: 'explicit.left', type: 'explicit', text: 'Leftmost # Flask' },
+                    ],
+                },
+            ],
+        }),
+    }))
+    vi.stubGlobal('fetch', fetch)
+    try {
+        expect(await searchTitle(slug, '1')).toBe('Leftmost # Flask')
+    } finally {
+        vi.unstubAllGlobals()
+    }
+})
+it('leaves titles empty when the slug has no readable parameters', async () => {
+    const slug = gzipSync(JSON.stringify({ stats: [] })).toString('base64url')
+    expect(await searchTitle(slug, '2')).toBe('')
+})
+const filterCatalogFetch = (url: string) => {
+    if (!String(url).includes('/data/filters')) throw new Error('unexpected fetch')
+    return {
+        ok: true,
+        json: async () => ({
+            result: [
+                {
+                    id: 'type_filters',
+                    filters: [
+                        {
+                            id: 'category',
+                            text: 'Category',
+                            option: { options: [{ id: 'weapon.bow', text: 'Bow' }] },
+                        },
+                        {
+                            id: 'rarity',
+                            text: 'Rarity',
+                            option: { options: [{ id: 'rare', text: 'Rare' }] },
+                        },
+                    ],
+                },
+                {
+                    id: 'misc_filters',
+                    filters: [
+                        {
+                            id: 'crafted',
+                            text: 'Crafted',
+                            option: { options: [{ id: 'true', text: 'Yes' }] },
+                        },
+                    ],
+                },
+            ],
+        }),
+    }
+}
+it('reads category, rarity and misc filters from the query', async () => {
+    // Real PoE1 search: Item Category Bow, Rarity Rare, Crafted yes.
+    const slug =
+        'H4sIAAAAAAAAA3WNQQrDMBAD_6Kz6QP8lRLKxtkUQ2qb9ZoQwv69JL3Yh94kNJJOVCVtFf5ELhpzgkfl0ITmjWHuziv884QeheFBaYHDGjdluYLJps7-sFfnOxlI-Z3lGN52ppLTY877dSckUUdASBhm5vCJNfybFlqVl6Go0u6i2RePBzxS5wAAAA'
+    const fetch = vi.fn(async (url: string) => filterCatalogFetch(url))
+    vi.stubGlobal('fetch', fetch)
+    try {
+        expect(await searchTitle(slug, '1')).toBe('Bow · Rare · Crafted')
+    } finally {
+        vi.unstubAllGlobals()
+    }
+})
+it('skips Any options and excluded misc filters', async () => {
+    const slug = gzipSync(
+        JSON.stringify({
+            filters: {
+                type_filters: { filters: { rarity: { option: 'any' } } },
+                misc_filters: { filters: { crafted: { option: 'false' } } },
+            },
+        })
+    ).toString('base64url')
+    expect(await searchTitle(slug, '1')).toBe('')
 })
 it('lists variants once and hides irrelevant names', () => {
     const base = {

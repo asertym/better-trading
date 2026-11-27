@@ -11,7 +11,8 @@ export function recommendTitle() {
     return (
         name ||
         (category === 'Any' ? '' : category) +
-            (category && rarity && rarity !== 'Any' ? ` (${rarity})` : '')
+            (category && rarity && rarity !== 'Any' ? ` (${rarity})` : '') ||
+        searchedStats().join(' · ')
     )
 }
 export function searchedStats() {

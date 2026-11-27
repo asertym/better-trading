@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { DonationLink } from '../../components/DonationLink'
 import { Dialog } from '../../components/Dialog'
 import { ReleaseNotes } from '../../components/ReleaseNotes'
 import { searchShortcutsMarkdown } from '../../lib/searchShortcutDefinitions'
@@ -123,7 +124,7 @@ export function AboutPanel() {
             <InfoBox title="Backup tools">
                 <BackupControls />
             </InfoBox>
-            <InfoBox title="Better Trading">
+            <InfoBox title="Better Trading+">
                 <p>
                     A better, better trading experience for Path of Exile and Path of Exile 2. Set
                     bookmarks, compare prices, manage live searches, and more, all in one panel.
@@ -163,15 +164,7 @@ export function AboutPanel() {
                     ).
                 </p>
                 <br />
-                <div className="space-y-2">
-                    <p>Consider to donate to support my efforts.</p>
-                    <a href="https://www.buymeacoffee.com/asertym">
-                        <img
-                            className="h-12"
-                            src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=asertym&button_colour=5F7FFF&font_colour=ffffff&font_family=Bree&outline_colour=000000&coffee_colour=FFDD00"
-                        />
-                    </a>
-                </div>
+                <DonationLink />
             </InfoBox>
             <p className="bt-about-disclaimer">
                 Better Trading is not affiliated with Grinding Gear Games.

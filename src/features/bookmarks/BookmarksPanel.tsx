@@ -77,11 +77,11 @@ export function BookmarksPanel() {
                     {league.warning}
                 </p>
             )}
-            <div className="bt-bookmark-toolbar">
-                <button className="bt-button" onClick={() => expand([])}>
+            <div className="bt-bookmark-toolbar flex">
+                <button className="bt-button w-full" onClick={() => expand([])}>
                     <Icon name="collapse" /> Collapse all
                 </button>
-                <button className="bt-button" onClick={() => setArchived(!archived)}>
+                <button className="bt-button w-full" onClick={() => setArchived(!archived)}>
                     <Icon name={archived ? 'undo' : 'archive'} />{' '}
                     {archived ? 'Show active' : 'Show archived'}
                 </button>

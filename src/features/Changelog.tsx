@@ -1,5 +1,6 @@
 import { preferences } from '../lib/preferences'
 import { useState } from 'react'
+import { DonationLink } from '../components/DonationLink'
 import { ReleaseNotes } from '../components/ReleaseNotes'
 import { Dialog } from '../components/Dialog'
 import { Icon } from '../components/Icon'
@@ -45,6 +46,8 @@ export function ChangelogDialog({ close }: { close: () => void }) {
     return (
         <Dialog title={`What's new — v${currentRelease.version}`} close={close}>
             <ReleaseNotes markdown={currentRelease.markdown} />
+            <hr className="my-4 border-white/10" />
+            <DonationLink />
         </Dialog>
     )
 }

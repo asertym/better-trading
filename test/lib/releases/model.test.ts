@@ -23,7 +23,7 @@ it('orders numeric versions within the rewrite and legacy histories separately',
         {
             '/0.1.0.md': note,
             '/0.10.0.md': note,
-            '/0.2.0.md': note,
+            '/0.2.2.md': note,
             '/legacy/1-9-2-mercenaries-2.md': '# Old',
             '/legacy/1-8-0-poe2-ea-1.md': '# Older',
         },
@@ -32,7 +32,7 @@ it('orders numeric versions within the rewrite and legacy histories separately',
     expect(current.version).toBe('0.1.0')
     expect(releases.map((release) => release.version)).toEqual([
         '0.10.0',
-        '0.2.0',
+        '0.2.2',
         '0.1.0',
         '1.9.2',
         '1.8.0',

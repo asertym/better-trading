@@ -23,7 +23,7 @@ export function HistoryPanel() {
                         {history.data.map((entry) => (
                             <li key={entry.id}>
                                 <a className="bt-history-link" href={safeTradeUrl(entry)}>
-                                    {entry.title || entry.slug}
+                                    {entry.title || 'Search'}
                                     <small>
                                         {entry.league} ·{' '}
                                         {new Date(entry.createdAt).toLocaleString()}
