@@ -136,7 +136,7 @@ export function AboutPanel() {
                 </p>
                 <br />
                 <a
-                    href="https://github.com/asertym/better-trading"
+                    href="https://github.com/asertym/better-trading-plus"
                     className="bt-github-link"
                     target="_blank"
                     rel="noreferrer">

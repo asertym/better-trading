@@ -7,7 +7,7 @@ export default {
     srcDir: 'src',
     modules: ['@wxt-dev/module-react'],
     zip: {
-        name: 'better-trading',
+        name: 'better-trading-plus',
         artifactTemplate: '{{name}}-{{version}}-{{browser}}.zip',
         sourcesTemplate: '{{name}}-{{version}}-sources.zip',
         excludeSources: [
